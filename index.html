@@ -116,57 +116,51 @@
                 </div>
 
                 <!-- Push-ups -->
-                <div class="challenge-card daily-challenge">
+                <div class="challenge-card">
                     <div class="challenge-header">
                         <div class="challenge-icon">
                             <i class="fas fa-hand-paper"></i>
                         </div>
                         <div class="challenge-info">
-                            <h3>Daily Push-ups</h3>
-                            <p>100 per day</p>
+                            <h3>Push-up Days</h3>
+                            <p>100 push-ups per day</p>
                         </div>
                     </div>
                     <div class="progress-container">
                         <div class="progress-text">
-                            <span id="pushupsCompleted">0</span> / 100 today
+                            <span id="pushupsCompleted">0</span> / 31 days completed
                         </div>
                         <div class="progress-bar-small">
                             <div class="progress-fill-small" id="pushupsProgress"></div>
                         </div>
                     </div>
-                    <div class="input-group">
-                        <input type="number" id="pushupsInput" placeholder="Enter count" min="1" max="100">
-                        <button class="action-btn" onclick="addPushups()">
-                            <i class="fas fa-plus"></i> Add Push-ups
-                        </button>
-                    </div>
+                    <button class="action-btn" onclick="incrementChallenge('pushups')">
+                        <i class="fas fa-plus"></i> Complete Day
+                    </button>
                 </div>
 
                 <!-- Reading -->
-                <div class="challenge-card daily-challenge">
+                <div class="challenge-card">
                     <div class="challenge-header">
                         <div class="challenge-icon">
                             <i class="fas fa-book"></i>
                         </div>
                         <div class="challenge-info">
-                            <h3>Daily Reading</h3>
+                            <h3>Reading Days</h3>
                             <p>10 pages per day</p>
                         </div>
                     </div>
                     <div class="progress-container">
                         <div class="progress-text">
-                            <span id="readingCompleted">0</span> / 10 pages today
+                            <span id="readingCompleted">0</span> / 31 days completed
                         </div>
                         <div class="progress-bar-small">
                             <div class="progress-fill-small" id="readingProgress"></div>
                         </div>
                     </div>
-                    <div class="input-group">
-                        <input type="number" id="readingInput" placeholder="Enter pages" min="1" max="50">
-                        <button class="action-btn" onclick="addReading()">
-                            <i class="fas fa-plus"></i> Add Pages
-                        </button>
-                    </div>
+                    <button class="action-btn" onclick="incrementChallenge('reading')">
+                        <i class="fas fa-plus"></i> Complete Day
+                    </button>
                 </div>
 
                 <!-- Lemon/Salt/Cayenne -->
