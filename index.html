@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>October Fitness Challenge 2024</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-fire"></i> October Fitness Challenge 2024</h1>
+                <p class="subtitle">Transform your lifestyle with your friends!</p>
+                <div class="progress-summary">
+                    <div class="overall-progress">
+                        <span class="progress-label">Overall Progress</span>
+                        <span class="progress-percentage" id="overallProgress">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="overallProgressBar"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="challenges-grid">
+                <!-- Norwegian 4x4 Workouts -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <div class="challenge-info">
+                            <h3>Norwegian 4x4 Workouts</h3>
+                            <p>High-intensity interval training</p>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-text">
+                            <span id="workoutsCompleted">0</span> / 8 completed
+                        </div>
+                        <div class="progress-bar-small">
+                            <div class="progress-fill-small" id="workoutsProgress"></div>
+                        </div>
+                    </div>
+                    <button class="action-btn" onclick="incrementChallenge('workouts')">
+                        <i class="fas fa-plus"></i> Complete Workout
+                    </button>
+                </div>
+
+                <!-- Yoga/Stretching -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="challenge-info">
+                            <h3>Yoga/Stretching Classes</h3>
+                            <p>10-15 minute sessions</p>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-text">
+                            <span id="yogaCompleted">0</span> / 12 completed
+                        </div>
+                        <div class="progress-bar-small">
+                            <div class="progress-fill-small" id="yogaProgress"></div>
+                        </div>
+                    </div>
+                    <button class="action-btn" onclick="incrementChallenge('yoga')">
+                        <i class="fas fa-plus"></i> Complete Session
+                    </button>
+                </div>
+
+                <!-- Meditation -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="challenge-info">
+                            <h3>Meditation Sessions</h3>
+                            <p>15 minute sessions</p>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-text">
+                            <span id="meditationCompleted">0</span> / 4 completed
+                        </div>
+                        <div class="progress-bar-small">
+                            <div class="progress-fill-small" id="meditationProgress"></div>
+                        </div>
+                    </div>
+                    <button class="action-btn" onclick="incrementChallenge('meditation')">
+                        <i class="fas fa-plus"></i> Complete Session
+                    </button>
+                </div>
+
+                <!-- Push-ups -->
+                <div class="challenge-card daily-challenge">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-hand-paper"></i>
+                        </div>
+                        <div class="challenge-info">
+                            <h3>Daily Push-ups</h3>
+                            <p>100 per day</p>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-text">
+                            <span id="pushupsCompleted">0</span> / 100 today
+                        </div>
+                        <div class="progress-bar-small">
+                            <div class="progress-fill-small" id="pushupsProgress"></div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="pushupsInput" placeholder="Enter count" min="1" max="100">
+                        <button class="action-btn" onclick="addPushups()">
+                            <i class="fas fa-plus"></i> Add Push-ups
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reading -->
+                <div class="challenge-card daily-challenge">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="challenge-info">
+                            <h3>Daily Reading</h3>
+                            <p>10 pages per day</p>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-text">
+                            <span id="readingCompleted">0</span> / 10 pages today
+                        </div>
+                        <div class="progress-bar-small">
+                            <div class="progress-fill-small" id="readingProgress"></div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="readingInput" placeholder="Enter pages" min="1" max="50">
+                        <button class="action-btn" onclick="addReading()">
+                            <i class="fas fa-plus"></i> Add Pages
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lemon/Salt/Cayenne -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div class="challenge-info">
+                            <h3>Lemon/Salt/Cayenne</h3>
+                            <p>4-5 days per week</p>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-text">
+                            <span id="drinkCompleted">0</span> / 20 days completed
+                        </div>
+                        <div class="progress-bar-small">
+                            <div class="progress-fill-small" id="drinkProgress"></div>
+                        </div>
+                    </div>
+                    <button class="action-btn" onclick="incrementChallenge('drink')">
+                        <i class="fas fa-plus"></i> Complete Today
+                    </button>
+                </div>
+
+                <!-- Walking/Running/Biking -->
+                <div class="challenge-card daily-challenge">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <div class="challenge-info">
+                            <h3>Daily Movement</h3>
+                            <p>2+ miles per day</p>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-text">
+                            <span id="movementCompleted">0.0</span> / 2.0 miles today
+                        </div>
+                        <div class="progress-bar-small">
+                            <div class="progress-fill-small" id="movementProgress"></div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="movementInput" placeholder="Enter miles" step="0.1" min="0.1" max="20">
+                        <button class="action-btn" onclick="addMovement()">
+                            <i class="fas fa-plus"></i> Add Miles
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h2><i class="fas fa-chart-line"></i> Daily Stats</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="todayScore">0</div>
+                        <div class="stat-label">Today's Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="streakDays">0</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalScore">0</div>
+                        <div class="stat-label">Total Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="calendar-section">
+                <h2><i class="fas fa-calendar-alt"></i> October Calendar</h2>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated by JavaScript -->
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Keep pushing! You've got this! 💪</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
