@@ -79,9 +79,9 @@ function switchUser(user) {
 
 // Load data from localStorage
 function loadData() {
-    const savedUserChallenges = localStorage.getItem('octoberChallenge2024MultiUser');
-    const savedUserDailyData = localStorage.getItem('octoberDailyData2024MultiUser');
-    const savedCurrentUser = localStorage.getItem('octoberCurrentUser2024');
+    const savedUserChallenges = localStorage.getItem('octoberChallenge2025MultiUser');
+    const savedUserDailyData = localStorage.getItem('octoberDailyData2025MultiUser');
+    const savedCurrentUser = localStorage.getItem('octoberCurrentUser2025');
     
     if (savedUserChallenges) {
         const parsed = JSON.parse(savedUserChallenges);
@@ -95,13 +95,27 @@ function loadData() {
     if (savedCurrentUser) {
         currentUser = savedCurrentUser;
     }
+    
+    // Reset Casey's data to 0 (remove this after first use)
+    if (userChallenges.casey.workouts.completed > 0 || userChallenges.casey.pushups.completed > 0) {
+        console.log('Resetting Casey\'s data to 0');
+        userChallenges.casey.workouts.completed = 0;
+        userChallenges.casey.yoga.completed = 0;
+        userChallenges.casey.meditation.completed = 0;
+        userChallenges.casey.pushups.completed = 0;
+        userChallenges.casey.reading.completed = 0;
+        userChallenges.casey.drink.completed = 0;
+        userChallenges.casey.movement.completed = 0;
+        userDailyData.casey = {};
+        saveData();
+    }
 }
 
 // Save data to localStorage
 function saveData() {
-    localStorage.setItem('octoberChallenge2024MultiUser', JSON.stringify(userChallenges));
-    localStorage.setItem('octoberDailyData2024MultiUser', JSON.stringify(userDailyData));
-    localStorage.setItem('octoberCurrentUser2024', currentUser);
+    localStorage.setItem('octoberChallenge2025MultiUser', JSON.stringify(userChallenges));
+    localStorage.setItem('octoberDailyData2025MultiUser', JSON.stringify(userDailyData));
+    localStorage.setItem('octoberCurrentUser2025', currentUser);
 }
 
 // Get date string in YYYY-MM-DD format
@@ -181,9 +195,34 @@ function incrementChallenge(challengeType) {
     console.log('Progress updated and data saved');
 }
 
-// Push-ups and reading are now monthly challenges, handled by incrementChallenge()
-
-// Movement is now a monthly challenge, handled by incrementChallenge()
+// Decrement challenge completion
+function decrementChallenge(challengeType) {
+    console.log('decrementChallenge called with:', challengeType, 'for user:', currentUser);
+    
+    const challenges = userChallenges[currentUser];
+    
+    // Don't allow going below 0
+    if (challenges[challengeType].completed > 0) {
+        challenges[challengeType].completed--;
+        console.log('Challenge decremented:', challengeType, 'completed:', challenges[challengeType].completed);
+        
+        // Add success animation
+        const button = event.target.closest('.remove-btn');
+        if (button) {
+            button.classList.add('success-animation');
+            setTimeout(() => button.classList.remove('success-animation'), 600);
+        }
+        
+        updateAllProgress();
+        updateStats();
+        generateCalendar();
+        saveData();
+        
+        console.log('Progress updated and data saved');
+    } else {
+        console.log('Cannot decrement below 0');
+    }
+}
 
 // Update all progress bars and counters
 function updateAllProgress() {
@@ -199,8 +238,28 @@ function updateAllProgress() {
     updateChallengeProgress('drink', challenges.drink.completed, challenges.drink.target);
     updateChallengeProgress('movement', challenges.movement.completed, challenges.movement.target);
     
+    // Update remove button states
+    updateRemoveButtonStates();
+    
     // Update overall progress
     updateOverallProgress();
+}
+
+// Update remove button states (disable when count is 0)
+function updateRemoveButtonStates() {
+    const challenges = userChallenges[currentUser];
+    const challengeTypes = ['workouts', 'yoga', 'meditation', 'pushups', 'reading', 'drink', 'movement'];
+    
+    challengeTypes.forEach(challengeType => {
+        const removeBtn = document.querySelector(`[onclick="decrementChallenge('${challengeType}')"]`);
+        if (removeBtn) {
+            if (challenges[challengeType].completed > 0) {
+                removeBtn.disabled = false;
+            } else {
+                removeBtn.disabled = true;
+            }
+        }
+    });
 }
 
 // Update individual challenge progress
@@ -331,9 +390,9 @@ function generateCalendar() {
 // Utility functions for debugging (can be removed in production)
 function resetAllData() {
     if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
-        localStorage.removeItem('octoberChallenge2024MultiUser');
-        localStorage.removeItem('octoberDailyData2024MultiUser');
-        localStorage.removeItem('octoberCurrentUser2024');
+        localStorage.removeItem('octoberChallenge2025MultiUser');
+        localStorage.removeItem('octoberDailyData2025MultiUser');
+        localStorage.removeItem('octoberCurrentUser2025');
         location.reload();
     }
 }
