@@ -280,6 +280,48 @@ body {
     transform: translateY(0);
 }
 
+/* Button group styles */
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.button-group .action-btn {
+    flex: 1;
+}
+
+.remove-btn {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 100px;
+}
+
+.remove-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+}
+
+.remove-btn:active {
+    transform: translateY(0);
+}
+
+.remove-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 .input-group {
     display: flex;
     gap: 10px;
