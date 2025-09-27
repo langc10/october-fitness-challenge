@@ -1,30 +1,39 @@
-Great! You've successfully created the first two files. Now let's create the JavaScript file to make the app fully functional.
+// Multi-user challenge tracking system
+let currentUser = 'casey'; // Default user
+const users = ['casey', 'kyle'];
 
-**For the third file:**
-- **Filename:** `script.js`
-- **Copy and paste this content:**
-
-```javascript
-// Challenge data structure
-const challenges = {
-    workouts: { target: 8, completed: 0, type: 'monthly' },
-    yoga: { target: 12, completed: 0, type: 'monthly' },
-    meditation: { target: 4, completed: 0, type: 'monthly' },
-    pushups: { target: 100, completed: 0, type: 'daily' },
-    reading: { target: 10, completed: 0, type: 'daily' },
-    drink: { target: 20, completed: 0, type: 'monthly' },
-    movement: { target: 2.0, completed: 0, type: 'daily' }
+// Challenge data structure for each user
+const userChallenges = {
+    casey: {
+        workouts: { target: 8, completed: 0, type: 'monthly' },
+        yoga: { target: 12, completed: 0, type: 'monthly' },
+        meditation: { target: 4, completed: 0, type: 'monthly' },
+        pushups: { target: 100, completed: 0, type: 'daily' },
+        reading: { target: 10, completed: 0, type: 'daily' },
+        drink: { target: 20, completed: 0, type: 'monthly' },
+        movement: { target: 2.0, completed: 0, type: 'daily' }
+    },
+    kyle: {
+        workouts: { target: 8, completed: 0, type: 'monthly' },
+        yoga: { target: 12, completed: 0, type: 'monthly' },
+        meditation: { target: 4, completed: 0, type: 'monthly' },
+        pushups: { target: 100, completed: 0, type: 'daily' },
+        reading: { target: 10, completed: 0, type: 'daily' },
+        drink: { target: 20, completed: 0, type: 'monthly' },
+        movement: { target: 2.0, completed: 0, type: 'daily' }
+    }
 };
 
-// Daily data structure
-let dailyData = {};
-let currentDate = new Date();
-let startDate = new Date('2024-10-01');
-let endDate = new Date('2024-10-31');
+// Daily data structure for each user
+let userDailyData = {
+    casey: {},
+    kyle: {}
+};
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
+    switchUser('casey'); // Start with Casey
     generateCalendar();
     updateAllProgress();
     updateStats();
@@ -33,24 +42,21 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(checkDateChange, 60000); // Check every minute
 });
 
-// Load data from localStorage
-function loadData() {
-    const savedChallenges = localStorage.getItem('octoberChallenge2024');
-    const savedDailyData = localStorage.getItem('octoberDailyData2024');
+// Switch between users
+function switchUser(user) {
+    currentUser = user;
     
-    if (savedChallenges) {
-        const parsed = JSON.parse(savedChallenges);
-        Object.assign(challenges, parsed);
-    }
+    // Update UI
+    document.getElementById('currentUserDisplay').textContent = user.charAt(0).toUpperCase() + user.slice(1);
     
-    if (savedDailyData) {
-        dailyData = JSON.parse(savedDailyData);
-    }
+    // Update button states
+    document.getElementById('caseyBtn').classList.toggle('active', user === 'casey');
+    document.getElementById('kyleBtn').classList.toggle('active', user === 'kyle');
     
-    // Initialize today's daily data if not exists
+    // Load today's daily progress for the selected user
     const today = getDateString(new Date());
-    if (!dailyData[today]) {
-        dailyData[today] = {
+    if (!userDailyData[currentUser][today]) {
+        userDailyData[currentUser][today] = {
             pushups: 0,
             reading: 0,
             movement: 0,
@@ -58,16 +64,41 @@ function loadData() {
         };
     }
     
-    // Load today's daily progress
-    challenges.pushups.completed = dailyData[today].pushups || 0;
-    challenges.reading.completed = dailyData[today].reading || 0;
-    challenges.movement.completed = dailyData[today].movement || 0;
+    userChallenges[currentUser].pushups.completed = userDailyData[currentUser][today].pushups || 0;
+    userChallenges[currentUser].reading.completed = userDailyData[currentUser][today].reading || 0;
+    userChallenges[currentUser].movement.completed = userDailyData[currentUser][today].movement || 0;
+    
+    // Update all displays
+    updateAllProgress();
+    updateStats();
+    generateCalendar();
+}
+
+// Load data from localStorage
+function loadData() {
+    const savedUserChallenges = localStorage.getItem('octoberChallenge2024MultiUser');
+    const savedUserDailyData = localStorage.getItem('octoberDailyData2024MultiUser');
+    const savedCurrentUser = localStorage.getItem('octoberCurrentUser2024');
+    
+    if (savedUserChallenges) {
+        const parsed = JSON.parse(savedUserChallenges);
+        Object.assign(userChallenges, parsed);
+    }
+    
+    if (savedUserDailyData) {
+        userDailyData = JSON.parse(savedUserDailyData);
+    }
+    
+    if (savedCurrentUser) {
+        currentUser = savedCurrentUser;
+    }
 }
 
 // Save data to localStorage
 function saveData() {
-    localStorage.setItem('octoberChallenge2024', JSON.stringify(challenges));
-    localStorage.setItem('octoberDailyData2024', JSON.stringify(dailyData));
+    localStorage.setItem('octoberChallenge2024MultiUser', JSON.stringify(userChallenges));
+    localStorage.setItem('octoberDailyData2024MultiUser', JSON.stringify(userDailyData));
+    localStorage.setItem('octoberCurrentUser2024', currentUser);
 }
 
 // Get date string in YYYY-MM-DD format
@@ -83,36 +114,41 @@ function checkDateChange() {
     if (lastCheck !== today) {
         localStorage.setItem('lastDateCheck', today);
         
-        // Reset daily challenges for new day
-        if (!dailyData[today]) {
-            dailyData[today] = {
-                pushups: 0,
-                reading: 0,
-                movement: 0,
-                completed: []
-            };
-        }
-        
-        // Reset daily challenge progress
-        challenges.pushups.completed = dailyData[today].pushups || 0;
-        challenges.reading.completed = dailyData[today].reading || 0;
-        challenges.movement.completed = dailyData[today].movement || 0;
+        // Reset daily challenges for new day for all users
+        users.forEach(user => {
+            if (!userDailyData[user][today]) {
+                userDailyData[user][today] = {
+                    pushups: 0,
+                    reading: 0,
+                    movement: 0,
+                    completed: []
+                };
+            }
+            
+            // Reset daily challenge progress for current user
+            userChallenges[user].pushups.completed = userDailyData[user][today].pushups || 0;
+            userChallenges[user].reading.completed = userDailyData[user][today].reading || 0;
+            userChallenges[user].movement.completed = userDailyData[user][today].movement || 0;
+        });
         
         updateAllProgress();
         updateStats();
         generateCalendar();
+        saveData();
     }
 }
 
 // Increment challenge completion
 function incrementChallenge(challengeType) {
+    const challenges = userChallenges[currentUser];
+    
     if (challenges[challengeType].type === 'monthly') {
         challenges[challengeType].completed++;
     } else {
         // For daily challenges, add to today's data
         const today = getDateString(new Date());
-        if (!dailyData[today]) {
-            dailyData[today] = {
+        if (!userDailyData[currentUser][today]) {
+            userDailyData[currentUser][today] = {
                 pushups: 0,
                 reading: 0,
                 movement: 0,
@@ -122,13 +158,13 @@ function incrementChallenge(challengeType) {
         
         if (challengeType === 'pushups') {
             challenges.pushups.completed++;
-            dailyData[today].pushups = challenges.pushups.completed;
+            userDailyData[currentUser][today].pushups = challenges.pushups.completed;
         } else if (challengeType === 'reading') {
             challenges.reading.completed++;
-            dailyData[today].reading = challenges.reading.completed;
+            userDailyData[currentUser][today].reading = challenges.reading.completed;
         } else if (challengeType === 'movement') {
             challenges.movement.completed++;
-            dailyData[today].movement = challenges.movement.completed;
+            userDailyData[currentUser][today].movement = challenges.movement.completed;
         }
     }
     
@@ -150,8 +186,8 @@ function addPushups() {
     
     if (amount && amount > 0) {
         const today = getDateString(new Date());
-        if (!dailyData[today]) {
-            dailyData[today] = {
+        if (!userDailyData[currentUser][today]) {
+            userDailyData[currentUser][today] = {
                 pushups: 0,
                 reading: 0,
                 movement: 0,
@@ -159,8 +195,8 @@ function addPushups() {
             };
         }
         
-        challenges.pushups.completed = Math.min(100, challenges.pushups.completed + amount);
-        dailyData[today].pushups = challenges.pushups.completed;
+        userChallenges[currentUser].pushups.completed = Math.min(100, userChallenges[currentUser].pushups.completed + amount);
+        userDailyData[currentUser][today].pushups = userChallenges[currentUser].pushups.completed;
         
         input.value = '';
         updateAllProgress();
@@ -181,8 +217,8 @@ function addReading() {
     
     if (amount && amount > 0) {
         const today = getDateString(new Date());
-        if (!dailyData[today]) {
-            dailyData[today] = {
+        if (!userDailyData[currentUser][today]) {
+            userDailyData[currentUser][today] = {
                 pushups: 0,
                 reading: 0,
                 movement: 0,
@@ -190,8 +226,8 @@ function addReading() {
             };
         }
         
-        challenges.reading.completed = Math.min(10, challenges.reading.completed + amount);
-        dailyData[today].reading = challenges.reading.completed;
+        userChallenges[currentUser].reading.completed = Math.min(10, userChallenges[currentUser].reading.completed + amount);
+        userDailyData[currentUser][today].reading = userChallenges[currentUser].reading.completed;
         
         input.value = '';
         updateAllProgress();
@@ -212,8 +248,8 @@ function addMovement() {
     
     if (amount && amount > 0) {
         const today = getDateString(new Date());
-        if (!dailyData[today]) {
-            dailyData[today] = {
+        if (!userDailyData[currentUser][today]) {
+            userDailyData[currentUser][today] = {
                 pushups: 0,
                 reading: 0,
                 movement: 0,
@@ -221,8 +257,8 @@ function addMovement() {
             };
         }
         
-        challenges.movement.completed = Math.min(20, challenges.movement.completed + amount);
-        dailyData[today].movement = challenges.movement.completed;
+        userChallenges[currentUser].movement.completed = Math.min(20, userChallenges[currentUser].movement.completed + amount);
+        userDailyData[currentUser][today].movement = userChallenges[currentUser].movement.completed;
         
         input.value = '';
         updateAllProgress();
@@ -238,6 +274,8 @@ function addMovement() {
 
 // Update all progress bars and counters
 function updateAllProgress() {
+    const challenges = userChallenges[currentUser];
+    
     // Update individual challenge progress
     updateChallengeProgress('workouts', challenges.workouts.completed, challenges.workouts.target);
     updateChallengeProgress('yoga', challenges.yoga.completed, challenges.yoga.target);
@@ -270,6 +308,7 @@ function updateChallengeProgress(challengeType, completed, target) {
 
 // Update overall progress
 function updateOverallProgress() {
+    const challenges = userChallenges[currentUser];
     let totalCompleted = 0;
     let totalTarget = 0;
     
@@ -297,6 +336,7 @@ function updateOverallProgress() {
 
 // Update stats section
 function updateStats() {
+    const challenges = userChallenges[currentUser];
     const today = getDateString(new Date());
     
     // Calculate today's score (0-7 points)
@@ -309,11 +349,11 @@ function updateStats() {
     
     // Calculate streak
     let streak = 0;
-    const sortedDates = Object.keys(dailyData).sort();
+    const sortedDates = Object.keys(userDailyData[currentUser]).sort();
     for (let i = sortedDates.length - 1; i >= 0; i--) {
         const date = sortedDates[i];
-        const dayData = dailyData[date];
-        if (dayData.pushups >= 100 && dayData.reading >= 10 && dayData.movement >= 2.0) {
+        const dayData = userDailyData[currentUser][date];
+        if (dayData && dayData.pushups >= 100 && dayData.reading >= 10 && dayData.movement >= 2.0) {
             streak++;
         } else {
             break;
@@ -324,10 +364,10 @@ function updateStats() {
     
     // Calculate total score
     let totalScore = 0;
-    Object.values(dailyData).forEach(dayData => {
-        if (dayData.pushups >= 100) totalScore++;
-        if (dayData.reading >= 10) totalScore++;
-        if (dayData.movement >= 2.0) totalScore++;
+    Object.values(userDailyData[currentUser]).forEach(dayData => {
+        if (dayData && dayData.pushups >= 100) totalScore++;
+        if (dayData && dayData.reading >= 10) totalScore++;
+        if (dayData && dayData.movement >= 2.0) totalScore++;
     });
     
     // Add monthly challenge completions
@@ -368,7 +408,7 @@ function generateCalendar() {
     for (let day = 1; day <= 31; day++) {
         const dayElement = document.createElement('div');
         const dateString = `2024-10-${day.toString().padStart(2, '0')}`;
-        const dayData = dailyData[dateString];
+        const dayData = userDailyData[currentUser][dateString];
         
         dayElement.className = 'calendar-day';
         dayElement.textContent = day;
@@ -402,16 +442,18 @@ function generateCalendar() {
 // Utility functions for debugging (can be removed in production)
 function resetAllData() {
     if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
-        localStorage.removeItem('octoberChallenge2024');
-        localStorage.removeItem('octoberDailyData2024');
+        localStorage.removeItem('octoberChallenge2024MultiUser');
+        localStorage.removeItem('octoberDailyData2024MultiUser');
+        localStorage.removeItem('octoberCurrentUser2024');
         location.reload();
     }
 }
 
 function exportData() {
     const data = {
-        challenges: challenges,
-        dailyData: dailyData,
+        userChallenges: userChallenges,
+        userDailyData: userDailyData,
+        currentUser: currentUser,
         exportDate: new Date().toISOString()
     };
     
