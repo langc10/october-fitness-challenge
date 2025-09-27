@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Reset daily challenges at midnight
     setInterval(checkDateChange, 60000); // Check every minute
+    
+    // Debug: Log that the app is loaded
+    console.log('October Fitness Challenge app loaded for user:', currentUser);
 });
 
 // Switch between users
@@ -140,10 +143,13 @@ function checkDateChange() {
 
 // Increment challenge completion
 function incrementChallenge(challengeType) {
+    console.log('incrementChallenge called with:', challengeType, 'for user:', currentUser);
+    
     const challenges = userChallenges[currentUser];
     
     if (challenges[challengeType].type === 'monthly') {
         challenges[challengeType].completed++;
+        console.log('Monthly challenge updated:', challengeType, 'completed:', challenges[challengeType].completed);
     } else {
         // For daily challenges, add to today's data
         const today = getDateString(new Date());
@@ -166,17 +172,22 @@ function incrementChallenge(challengeType) {
             challenges.movement.completed++;
             userDailyData[currentUser][today].movement = challenges.movement.completed;
         }
+        console.log('Daily challenge updated:', challengeType, 'completed:', challenges[challengeType].completed);
     }
     
     // Add success animation
     const button = event.target.closest('.action-btn');
-    button.classList.add('success-animation');
-    setTimeout(() => button.classList.remove('success-animation'), 600);
+    if (button) {
+        button.classList.add('success-animation');
+        setTimeout(() => button.classList.remove('success-animation'), 600);
+    }
     
     updateAllProgress();
     updateStats();
     generateCalendar();
     saveData();
+    
+    console.log('Progress updated and data saved');
 }
 
 // Add pushups with custom amount
@@ -275,6 +286,7 @@ function addMovement() {
 // Update all progress bars and counters
 function updateAllProgress() {
     const challenges = userChallenges[currentUser];
+    console.log('Updating progress for user:', currentUser, 'challenges:', challenges);
     
     // Update individual challenge progress
     updateChallengeProgress('workouts', challenges.workouts.completed, challenges.workouts.target);
@@ -292,17 +304,24 @@ function updateAllProgress() {
 // Update individual challenge progress
 function updateChallengeProgress(challengeType, completed, target) {
     const percentage = Math.min(100, (completed / target) * 100);
+    console.log(`Updating ${challengeType}: ${completed}/${target} (${percentage}%)`);
     
     // Update counter
     const counterElement = document.getElementById(challengeType + 'Completed');
     if (counterElement) {
         counterElement.textContent = challengeType === 'movement' ? completed.toFixed(1) : completed;
+        console.log(`Updated counter for ${challengeType} to:`, counterElement.textContent);
+    } else {
+        console.error(`Counter element not found for ${challengeType}`);
     }
     
     // Update progress bar
     const progressElement = document.getElementById(challengeType + 'Progress');
     if (progressElement) {
         progressElement.style.width = percentage + '%';
+        console.log(`Updated progress bar for ${challengeType} to:`, percentage + '%');
+    } else {
+        console.error(`Progress element not found for ${challengeType}`);
     }
 }
 
