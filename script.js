@@ -8,8 +8,8 @@ const userChallenges = {
         workouts: { target: 8, completed: 0, type: 'monthly' },
         yoga: { target: 12, completed: 0, type: 'monthly' },
         meditation: { target: 4, completed: 0, type: 'monthly' },
-        pushups: { target: 100, completed: 0, type: 'daily' },
-        reading: { target: 10, completed: 0, type: 'daily' },
+        pushups: { target: 31, completed: 0, type: 'monthly' },
+        reading: { target: 31, completed: 0, type: 'monthly' },
         drink: { target: 20, completed: 0, type: 'monthly' },
         movement: { target: 20, completed: 0, type: 'monthly' }
     },
@@ -17,8 +17,8 @@ const userChallenges = {
         workouts: { target: 8, completed: 0, type: 'monthly' },
         yoga: { target: 12, completed: 0, type: 'monthly' },
         meditation: { target: 4, completed: 0, type: 'monthly' },
-        pushups: { target: 100, completed: 0, type: 'daily' },
-        reading: { target: 10, completed: 0, type: 'daily' },
+        pushups: { target: 31, completed: 0, type: 'monthly' },
+        reading: { target: 31, completed: 0, type: 'monthly' },
         drink: { target: 20, completed: 0, type: 'monthly' },
         movement: { target: 20, completed: 0, type: 'monthly' }
     }
@@ -162,13 +162,7 @@ function incrementChallenge(challengeType) {
             };
         }
         
-        if (challengeType === 'pushups') {
-            challenges.pushups.completed++;
-            userDailyData[currentUser][today].pushups = challenges.pushups.completed;
-        } else if (challengeType === 'reading') {
-            challenges.reading.completed++;
-            userDailyData[currentUser][today].reading = challenges.reading.completed;
-        }
+        // Push-ups and reading are now monthly challenges, handled above
         console.log('Daily challenge updated:', challengeType, 'completed:', challenges[challengeType].completed);
     }
     
@@ -187,67 +181,7 @@ function incrementChallenge(challengeType) {
     console.log('Progress updated and data saved');
 }
 
-// Add pushups with custom amount
-function addPushups() {
-    const input = document.getElementById('pushupsInput');
-    const amount = parseInt(input.value);
-    
-    if (amount && amount > 0) {
-        const today = getDateString(new Date());
-        if (!userDailyData[currentUser][today]) {
-            userDailyData[currentUser][today] = {
-                pushups: 0,
-                reading: 0,
-                movement: 0,
-                completed: []
-            };
-        }
-        
-        userChallenges[currentUser].pushups.completed = Math.min(100, userChallenges[currentUser].pushups.completed + amount);
-        userDailyData[currentUser][today].pushups = userChallenges[currentUser].pushups.completed;
-        
-        input.value = '';
-        updateAllProgress();
-        updateStats();
-        saveData();
-        
-        // Success animation
-        const button = event.target.closest('.action-btn');
-        button.classList.add('success-animation');
-        setTimeout(() => button.classList.remove('success-animation'), 600);
-    }
-}
-
-// Add reading pages
-function addReading() {
-    const input = document.getElementById('readingInput');
-    const amount = parseInt(input.value);
-    
-    if (amount && amount > 0) {
-        const today = getDateString(new Date());
-        if (!userDailyData[currentUser][today]) {
-            userDailyData[currentUser][today] = {
-                pushups: 0,
-                reading: 0,
-                movement: 0,
-                completed: []
-            };
-        }
-        
-        userChallenges[currentUser].reading.completed = Math.min(10, userChallenges[currentUser].reading.completed + amount);
-        userDailyData[currentUser][today].reading = userChallenges[currentUser].reading.completed;
-        
-        input.value = '';
-        updateAllProgress();
-        updateStats();
-        saveData();
-        
-        // Success animation
-        const button = event.target.closest('.action-btn');
-        button.classList.add('success-animation');
-        setTimeout(() => button.classList.remove('success-animation'), 600);
-    }
-}
+// Push-ups and reading are now monthly challenges, handled by incrementChallenge()
 
 // Movement is now a monthly challenge, handled by incrementChallenge()
 
@@ -299,20 +233,11 @@ function updateOverallProgress() {
     let totalCompleted = 0;
     let totalTarget = 0;
     
-    // Calculate monthly challenges progress
-    const monthlyChallenges = ['workouts', 'yoga', 'meditation', 'drink'];
+    // Calculate monthly challenges progress (all challenges are now monthly)
+    const monthlyChallenges = ['workouts', 'yoga', 'meditation', 'pushups', 'reading', 'drink', 'movement'];
     monthlyChallenges.forEach(challenge => {
         totalCompleted += challenges[challenge].completed;
         totalTarget += challenges[challenge].target;
-    });
-    
-    // Calculate daily challenges progress (based on today's completion)
-    const dailyChallenges = ['pushups', 'reading', 'movement'];
-    dailyChallenges.forEach(challenge => {
-        const completed = challenges[challenge].completed;
-        const target = challenges[challenge].target;
-        totalCompleted += Math.min(1, completed / target); // Normalize daily to 0-1
-        totalTarget += 1;
     });
     
     const overallPercentage = Math.round((totalCompleted / totalTarget) * 100);
@@ -326,40 +251,26 @@ function updateStats() {
     const challenges = userChallenges[currentUser];
     const today = getDateString(new Date());
     
-    // Calculate today's score (0-7 points)
+    // Calculate today's score (0-7 points for all monthly challenges)
     let todayScore = 0;
+    if (challenges.workouts.completed >= challenges.workouts.target) todayScore++;
+    if (challenges.yoga.completed >= challenges.yoga.target) todayScore++;
+    if (challenges.meditation.completed >= challenges.meditation.target) todayScore++;
     if (challenges.pushups.completed >= challenges.pushups.target) todayScore++;
     if (challenges.reading.completed >= challenges.reading.target) todayScore++;
+    if (challenges.drink.completed >= challenges.drink.target) todayScore++;
     if (challenges.movement.completed >= challenges.movement.target) todayScore++;
     
     document.getElementById('todayScore').textContent = todayScore;
     
-    // Calculate streak (only for daily challenges now)
-    let streak = 0;
-    const sortedDates = Object.keys(userDailyData[currentUser]).sort();
-    for (let i = sortedDates.length - 1; i >= 0; i--) {
-        const date = sortedDates[i];
-        const dayData = userDailyData[currentUser][date];
-        if (dayData && dayData.pushups >= 100 && dayData.reading >= 10) {
-            streak++;
-        } else {
-            break;
-        }
-    }
+    // Calculate streak (no daily challenges anymore, so streak is 0)
+    document.getElementById('streakDays').textContent = 0;
     
-    document.getElementById('streakDays').textContent = streak;
-    
-    // Calculate total score
-    let totalScore = 0;
-    Object.values(userDailyData[currentUser]).forEach(dayData => {
-        if (dayData && dayData.pushups >= 100) totalScore++;
-        if (dayData && dayData.reading >= 10) totalScore++;
-    });
-    
-    // Add monthly challenge completions
-    totalScore += challenges.workouts.completed + challenges.yoga.completed + 
-                  challenges.meditation.completed + challenges.drink.completed + 
-                  challenges.movement.completed;
+    // Calculate total score (all monthly challenge completions)
+    let totalScore = challenges.workouts.completed + challenges.yoga.completed + 
+                    challenges.meditation.completed + challenges.pushups.completed + 
+                    challenges.reading.completed + challenges.drink.completed + 
+                    challenges.movement.completed;
     
     document.getElementById('totalScore').textContent = totalScore;
 }
@@ -409,15 +320,8 @@ function generateCalendar() {
         if (isToday) {
             dayElement.classList.add('today');
         } else if (dayData) {
-            // Check completion status (only daily challenges now)
-            const completed = dayData.pushups >= 100 && dayData.reading >= 10;
-            const partial = dayData.pushups > 0 || dayData.reading > 0;
-            
-            if (completed) {
-                dayElement.classList.add('completed');
-            } else if (partial) {
-                dayElement.classList.add('partial');
-            }
+            // No daily challenges anymore, so no completion status for individual days
+            // Calendar will show as default (no special styling)
         }
         
         calendarGrid.appendChild(dayElement);
