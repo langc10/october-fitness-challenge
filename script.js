@@ -11,7 +11,7 @@ const userChallenges = {
         pushups: { target: 100, completed: 0, type: 'daily' },
         reading: { target: 10, completed: 0, type: 'daily' },
         drink: { target: 20, completed: 0, type: 'monthly' },
-        movement: { target: 2.0, completed: 0, type: 'daily' }
+        movement: { target: 20, completed: 0, type: 'monthly' }
     },
     kyle: {
         workouts: { target: 8, completed: 0, type: 'monthly' },
@@ -20,7 +20,7 @@ const userChallenges = {
         pushups: { target: 100, completed: 0, type: 'daily' },
         reading: { target: 10, completed: 0, type: 'daily' },
         drink: { target: 20, completed: 0, type: 'monthly' },
-        movement: { target: 2.0, completed: 0, type: 'daily' }
+        movement: { target: 20, completed: 0, type: 'monthly' }
     }
 };
 
@@ -168,9 +168,6 @@ function incrementChallenge(challengeType) {
         } else if (challengeType === 'reading') {
             challenges.reading.completed++;
             userDailyData[currentUser][today].reading = challenges.reading.completed;
-        } else if (challengeType === 'movement') {
-            challenges.movement.completed++;
-            userDailyData[currentUser][today].movement = challenges.movement.completed;
         }
         console.log('Daily challenge updated:', challengeType, 'completed:', challenges[challengeType].completed);
     }
@@ -252,36 +249,7 @@ function addReading() {
     }
 }
 
-// Add movement miles
-function addMovement() {
-    const input = document.getElementById('movementInput');
-    const amount = parseFloat(input.value);
-    
-    if (amount && amount > 0) {
-        const today = getDateString(new Date());
-        if (!userDailyData[currentUser][today]) {
-            userDailyData[currentUser][today] = {
-                pushups: 0,
-                reading: 0,
-                movement: 0,
-                completed: []
-            };
-        }
-        
-        userChallenges[currentUser].movement.completed = Math.min(20, userChallenges[currentUser].movement.completed + amount);
-        userDailyData[currentUser][today].movement = userChallenges[currentUser].movement.completed;
-        
-        input.value = '';
-        updateAllProgress();
-        updateStats();
-        saveData();
-        
-        // Success animation
-        const button = event.target.closest('.action-btn');
-        button.classList.add('success-animation');
-        setTimeout(() => button.classList.remove('success-animation'), 600);
-    }
-}
+// Movement is now a monthly challenge, handled by incrementChallenge()
 
 // Update all progress bars and counters
 function updateAllProgress() {
@@ -309,7 +277,7 @@ function updateChallengeProgress(challengeType, completed, target) {
     // Update counter
     const counterElement = document.getElementById(challengeType + 'Completed');
     if (counterElement) {
-        counterElement.textContent = challengeType === 'movement' ? completed.toFixed(1) : completed;
+        counterElement.textContent = completed;
         console.log(`Updated counter for ${challengeType} to:`, counterElement.textContent);
     } else {
         console.error(`Counter element not found for ${challengeType}`);
@@ -366,13 +334,13 @@ function updateStats() {
     
     document.getElementById('todayScore').textContent = todayScore;
     
-    // Calculate streak
+    // Calculate streak (only for daily challenges now)
     let streak = 0;
     const sortedDates = Object.keys(userDailyData[currentUser]).sort();
     for (let i = sortedDates.length - 1; i >= 0; i--) {
         const date = sortedDates[i];
         const dayData = userDailyData[currentUser][date];
-        if (dayData && dayData.pushups >= 100 && dayData.reading >= 10 && dayData.movement >= 2.0) {
+        if (dayData && dayData.pushups >= 100 && dayData.reading >= 10) {
             streak++;
         } else {
             break;
@@ -386,12 +354,12 @@ function updateStats() {
     Object.values(userDailyData[currentUser]).forEach(dayData => {
         if (dayData && dayData.pushups >= 100) totalScore++;
         if (dayData && dayData.reading >= 10) totalScore++;
-        if (dayData && dayData.movement >= 2.0) totalScore++;
     });
     
     // Add monthly challenge completions
     totalScore += challenges.workouts.completed + challenges.yoga.completed + 
-                  challenges.meditation.completed + challenges.drink.completed;
+                  challenges.meditation.completed + challenges.drink.completed + 
+                  challenges.movement.completed;
     
     document.getElementById('totalScore').textContent = totalScore;
 }
@@ -411,8 +379,8 @@ function generateCalendar() {
     });
     
     // Generate calendar days
-    const firstDay = new Date(2024, 9, 1); // October 1, 2024
-    const lastDay = new Date(2024, 9, 31); // October 31, 2024
+    const firstDay = new Date(2025, 9, 1); // October 1, 2025
+    const lastDay = new Date(2025, 9, 31); // October 31, 2025
     
     // Add days before October
     const startDay = firstDay.getDay();
@@ -426,7 +394,7 @@ function generateCalendar() {
     // Add October days
     for (let day = 1; day <= 31; day++) {
         const dayElement = document.createElement('div');
-        const dateString = `2024-10-${day.toString().padStart(2, '0')}`;
+        const dateString = `2025-10-${day.toString().padStart(2, '0')}`;
         const dayData = userDailyData[currentUser][dateString];
         
         dayElement.className = 'calendar-day';
@@ -434,18 +402,16 @@ function generateCalendar() {
         
         // Check if today
         const today = new Date();
-        const isToday = today.getFullYear() === 2024 && 
+        const isToday = today.getFullYear() === 2025 && 
                        today.getMonth() === 9 && 
                        today.getDate() === day;
         
         if (isToday) {
             dayElement.classList.add('today');
         } else if (dayData) {
-            // Check completion status
-            const completed = dayData.pushups >= 100 && 
-                            dayData.reading >= 10 && 
-                            dayData.movement >= 2.0;
-            const partial = dayData.pushups > 0 || dayData.reading > 0 || dayData.movement > 0;
+            // Check completion status (only daily challenges now)
+            const completed = dayData.pushups >= 100 && dayData.reading >= 10;
+            const partial = dayData.pushups > 0 || dayData.reading > 0;
             
             if (completed) {
                 dayElement.classList.add('completed');
