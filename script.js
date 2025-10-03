@@ -1,6 +1,6 @@
 // Multi-user challenge tracking system
 let currentUser = 'casey'; // Default user
-const users = ['casey', 'kyle'];
+const users = ['casey', 'kyle', 'jillian'];
 
 // Challenge data structure for each user
 const userChallenges = {
@@ -21,20 +21,29 @@ const userChallenges = {
         reading: { target: 31, completed: 0, type: 'monthly' },
         drink: { target: 20, completed: 0, type: 'monthly' },
         movement: { target: 20, completed: 0, type: 'monthly' }
+    },
+    jillian: {
+        workouts: { target: 8, completed: 0, type: 'monthly' },
+        yoga: { target: 12, completed: 0, type: 'monthly' },
+        meditation: { target: 4, completed: 0, type: 'monthly' },
+        pushups: { target: 31, completed: 0, type: 'monthly' },
+        reading: { target: 31, completed: 0, type: 'monthly' },
+        drink: { target: 20, completed: 0, type: 'monthly' },
+        movement: { target: 20, completed: 0, type: 'monthly' }
     }
 };
 
 // Daily data structure for each user
 let userDailyData = {
     casey: {},
-    kyle: {}
+    kyle: {},
+    jillian: {}
 };
 
 // Initialize the app
-document.addEventListener('DOMContentLoaded', function() {
-    loadData();
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadData();
     switchUser('casey'); // Start with Casey
-    generateCalendar();
     updateAllProgress();
     updateStats();
     
@@ -55,6 +64,7 @@ function switchUser(user) {
     // Update button states
     document.getElementById('caseyBtn').classList.toggle('active', user === 'casey');
     document.getElementById('kyleBtn').classList.toggle('active', user === 'kyle');
+    document.getElementById('jillianBtn').classList.toggle('active', user === 'jillian');
     
     // Load today's daily progress for the selected user
     const today = getDateString(new Date());
@@ -74,48 +84,100 @@ function switchUser(user) {
     // Update all displays
     updateAllProgress();
     updateStats();
-    generateCalendar();
 }
 
-// Load data from localStorage
-function loadData() {
-    const savedUserChallenges = localStorage.getItem('octoberChallenge2025MultiUser');
-    const savedUserDailyData = localStorage.getItem('octoberDailyData2025MultiUser');
-    const savedCurrentUser = localStorage.getItem('octoberCurrentUser2025');
-    
-    if (savedUserChallenges) {
-        const parsed = JSON.parse(savedUserChallenges);
-        Object.assign(userChallenges, parsed);
-    }
-    
-    if (savedUserDailyData) {
-        userDailyData = JSON.parse(savedUserDailyData);
-    }
-    
-    if (savedCurrentUser) {
-        currentUser = savedCurrentUser;
-    }
-    
-    // Reset Casey's data to 0 (remove this after first use)
-    if (userChallenges.casey.workouts.completed > 0 || userChallenges.casey.pushups.completed > 0) {
-        console.log('Resetting Casey\'s data to 0');
-        userChallenges.casey.workouts.completed = 0;
-        userChallenges.casey.yoga.completed = 0;
-        userChallenges.casey.meditation.completed = 0;
-        userChallenges.casey.pushups.completed = 0;
-        userChallenges.casey.reading.completed = 0;
-        userChallenges.casey.drink.completed = 0;
-        userChallenges.casey.movement.completed = 0;
-        userDailyData.casey = {};
-        saveData();
+// Cloud storage configuration
+const CLOUD_STORAGE_URL = 'https://api.jsonbin.io/v3/b/65f8a1231f5677401f3b4f7e';
+const CLOUD_API_KEY = '$2a$10$V8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8';
+
+// Load data from cloud storage
+async function loadData() {
+    try {
+        console.log('Loading data from cloud storage...');
+        const response = await fetch(CLOUD_STORAGE_URL, {
+            method: 'GET',
+            headers: {
+                'X-Master-Key': CLOUD_API_KEY
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            const data = result.record;
+            
+            if (data && data.userChallenges) {
+                Object.assign(userChallenges, data.userChallenges);
+            }
+            if (data && data.userDailyData) {
+                Object.assign(userDailyData, data.userDailyData);
+            }
+            if (data && data.currentUser) {
+                currentUser = data.currentUser;
+            }
+            
+            console.log('Data loaded from cloud:', data);
+        } else {
+            console.log('No cloud data found, using defaults');
+        }
+    } catch (error) {
+        console.log('Error loading from cloud, using defaults:', error);
+        // Fallback to localStorage
+        const savedUserChallenges = localStorage.getItem('octoberChallenge2025MultiUser');
+        const savedUserDailyData = localStorage.getItem('octoberDailyData2025MultiUser');
+        const savedCurrentUser = localStorage.getItem('octoberCurrentUser2025');
+        
+        if (savedUserChallenges) {
+            const parsed = JSON.parse(savedUserChallenges);
+            Object.assign(userChallenges, parsed);
+        }
+        
+        if (savedUserDailyData) {
+            userDailyData = JSON.parse(savedUserDailyData);
+        }
+        
+        if (savedCurrentUser) {
+            currentUser = savedCurrentUser;
+        }
     }
 }
 
-// Save data to localStorage
-function saveData() {
-    localStorage.setItem('octoberChallenge2025MultiUser', JSON.stringify(userChallenges));
-    localStorage.setItem('octoberDailyData2025MultiUser', JSON.stringify(userDailyData));
-    localStorage.setItem('octoberCurrentUser2025', currentUser);
+// Save data to cloud storage
+async function saveData() {
+    try {
+        const dataToSave = {
+            userChallenges: userChallenges,
+            userDailyData: userDailyData,
+            currentUser: currentUser,
+            lastUpdated: new Date().toISOString()
+        };
+        
+        console.log('Saving data to cloud:', dataToSave);
+        
+        const response = await fetch(CLOUD_STORAGE_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': CLOUD_API_KEY
+            },
+            body: JSON.stringify(dataToSave)
+        });
+        
+        if (response.ok) {
+            console.log('Data saved to cloud successfully');
+        } else {
+            console.log('Error saving to cloud:', response.status);
+            // Fallback to localStorage
+            localStorage.setItem('octoberChallenge2025MultiUser', JSON.stringify(userChallenges));
+            localStorage.setItem('octoberDailyData2025MultiUser', JSON.stringify(userDailyData));
+            localStorage.setItem('octoberCurrentUser2025', currentUser);
+        }
+    } catch (error) {
+        console.log('Error saving to cloud, using localStorage:', error);
+        // Fallback to localStorage
+        localStorage.setItem('octoberChallenge2025MultiUser', JSON.stringify(userChallenges));
+        localStorage.setItem('octoberDailyData2025MultiUser', JSON.stringify(userDailyData));
+        localStorage.setItem('octoberCurrentUser2025', currentUser);
+    }
 }
 
 // Get date string in YYYY-MM-DD format
@@ -189,7 +251,6 @@ function incrementChallenge(challengeType) {
     
     updateAllProgress();
     updateStats();
-    generateCalendar();
     saveData();
     
     console.log('Progress updated and data saved');
@@ -305,87 +366,13 @@ function updateOverallProgress() {
     document.getElementById('overallProgressBar').style.width = overallPercentage + '%';
 }
 
-// Update stats section
+// Update stats section (simplified - no stats displayed)
 function updateStats() {
-    const challenges = userChallenges[currentUser];
-    const today = getDateString(new Date());
-    
-    // Calculate today's score (0-7 points for all monthly challenges)
-    let todayScore = 0;
-    if (challenges.workouts.completed >= challenges.workouts.target) todayScore++;
-    if (challenges.yoga.completed >= challenges.yoga.target) todayScore++;
-    if (challenges.meditation.completed >= challenges.meditation.target) todayScore++;
-    if (challenges.pushups.completed >= challenges.pushups.target) todayScore++;
-    if (challenges.reading.completed >= challenges.reading.target) todayScore++;
-    if (challenges.drink.completed >= challenges.drink.target) todayScore++;
-    if (challenges.movement.completed >= challenges.movement.target) todayScore++;
-    
-    document.getElementById('todayScore').textContent = todayScore;
-    
-    // Calculate streak (no daily challenges anymore, so streak is 0)
-    document.getElementById('streakDays').textContent = 0;
-    
-    // Calculate total score (all monthly challenge completions)
-    let totalScore = challenges.workouts.completed + challenges.yoga.completed + 
-                    challenges.meditation.completed + challenges.pushups.completed + 
-                    challenges.reading.completed + challenges.drink.completed + 
-                    challenges.movement.completed;
-    
-    document.getElementById('totalScore').textContent = totalScore;
+    // No stats to update since we removed the stats section
+    console.log('Stats updated for user:', currentUser);
 }
 
-// Generate calendar
-function generateCalendar() {
-    const calendarGrid = document.getElementById('calendarGrid');
-    calendarGrid.innerHTML = '';
-    
-    // Add day headers
-    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    dayHeaders.forEach(day => {
-        const dayElement = document.createElement('div');
-        dayElement.className = 'calendar-day header';
-        dayElement.textContent = day;
-        calendarGrid.appendChild(dayElement);
-    });
-    
-    // Generate calendar days
-    const firstDay = new Date(2025, 9, 1); // October 1, 2025
-    const lastDay = new Date(2025, 9, 31); // October 31, 2025
-    
-    // Add days before October
-    const startDay = firstDay.getDay();
-    for (let i = 0; i < startDay; i++) {
-        const dayElement = document.createElement('div');
-        dayElement.className = 'calendar-day other-month';
-        dayElement.textContent = '';
-        calendarGrid.appendChild(dayElement);
-    }
-    
-    // Add October days
-    for (let day = 1; day <= 31; day++) {
-        const dayElement = document.createElement('div');
-        const dateString = `2025-10-${day.toString().padStart(2, '0')}`;
-        const dayData = userDailyData[currentUser][dateString];
-        
-        dayElement.className = 'calendar-day';
-        dayElement.textContent = day;
-        
-        // Check if today
-        const today = new Date();
-        const isToday = today.getFullYear() === 2025 && 
-                       today.getMonth() === 9 && 
-                       today.getDate() === day;
-        
-        if (isToday) {
-            dayElement.classList.add('today');
-        } else if (dayData) {
-            // No daily challenges anymore, so no completion status for individual days
-            // Calendar will show as default (no special styling)
-        }
-        
-        calendarGrid.appendChild(dayElement);
-    }
-}
+// Calendar function removed since we removed the calendar section
 
 // Utility functions for debugging (can be removed in production)
 function resetAllData() {
