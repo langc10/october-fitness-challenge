@@ -77,9 +77,7 @@ function switchUser(user) {
         };
     }
     
-    userChallenges[currentUser].pushups.completed = userDailyData[currentUser][today].pushups || 0;
-    userChallenges[currentUser].reading.completed = userDailyData[currentUser][today].reading || 0;
-    userChallenges[currentUser].movement.completed = userDailyData[currentUser][today].movement || 0;
+    // No need to sync daily data since all challenges are monthly now
     
     // Update all displays
     updateAllProgress();
@@ -182,35 +180,15 @@ function getDateString(date) {
     return date.toISOString().split('T')[0];
 }
 
-// Check if date has changed (for daily resets)
+// Check if date has changed (simplified - no daily resets needed since all challenges are monthly)
 function checkDateChange() {
     const today = getDateString(new Date());
     const lastCheck = localStorage.getItem('lastDateCheck');
     
     if (lastCheck !== today) {
         localStorage.setItem('lastDateCheck', today);
-        
-        // Reset daily challenges for new day for all users
-        users.forEach(user => {
-            if (!userDailyData[user][today]) {
-                userDailyData[user][today] = {
-                    pushups: 0,
-                    reading: 0,
-                    movement: 0,
-                    completed: []
-                };
-            }
-            
-            // Reset daily challenge progress for current user
-            userChallenges[user].pushups.completed = userDailyData[user][today].pushups || 0;
-            userChallenges[user].reading.completed = userDailyData[user][today].reading || 0;
-            userChallenges[user].movement.completed = userDailyData[user][today].movement || 0;
-        });
-        
-        updateAllProgress();
-        updateStats();
-        generateCalendar();
-        saveData();
+        console.log('New day detected:', today);
+        // No need to reset anything since all challenges are monthly now
     }
 }
 
@@ -220,24 +198,9 @@ function incrementChallenge(challengeType) {
     
     const challenges = userChallenges[currentUser];
     
-    if (challenges[challengeType].type === 'monthly') {
-        challenges[challengeType].completed++;
-        console.log('Monthly challenge updated:', challengeType, 'completed:', challenges[challengeType].completed);
-    } else {
-        // For daily challenges, add to today's data
-        const today = getDateString(new Date());
-        if (!userDailyData[currentUser][today]) {
-            userDailyData[currentUser][today] = {
-                pushups: 0,
-                reading: 0,
-                movement: 0,
-                completed: []
-            };
-        }
-        
-        // Push-ups and reading are now monthly challenges, handled above
-        console.log('Daily challenge updated:', challengeType, 'completed:', challenges[challengeType].completed);
-    }
+    // All challenges are now monthly - just increment the completed count
+    challenges[challengeType].completed++;
+    console.log('Challenge updated:', challengeType, 'completed:', challenges[challengeType].completed);
     
     // Add success animation
     const button = event.target.closest('.action-btn');
