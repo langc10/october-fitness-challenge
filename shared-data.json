@@ -1,0 +1,38 @@
+{
+  "userChallenges": {
+    "casey": {
+      "workouts": { "target": 8, "completed": 0, "type": "monthly" },
+      "yoga": { "target": 12, "completed": 0, "type": "monthly" },
+      "meditation": { "target": 4, "completed": 0, "type": "monthly" },
+      "pushups": { "target": 31, "completed": 0, "type": "monthly" },
+      "reading": { "target": 31, "completed": 0, "type": "monthly" },
+      "drink": { "target": 20, "completed": 0, "type": "monthly" },
+      "movement": { "target": 20, "completed": 0, "type": "monthly" }
+    },
+    "kyle": {
+      "workouts": { "target": 8, "completed": 0, "type": "monthly" },
+      "yoga": { "target": 12, "completed": 0, "type": "monthly" },
+      "meditation": { "target": 4, "completed": 0, "type": "monthly" },
+      "pushups": { "target": 31, "completed": 0, "type": "monthly" },
+      "reading": { "target": 31, "completed": 0, "type": "monthly" },
+      "drink": { "target": 20, "completed": 0, "type": "monthly" },
+      "movement": { "target": 20, "completed": 0, "type": "monthly" }
+    },
+    "jillian": {
+      "workouts": { "target": 8, "completed": 0, "type": "monthly" },
+      "yoga": { "target": 12, "completed": 0, "type": "monthly" },
+      "meditation": { "target": 4, "completed": 0, "type": "monthly" },
+      "pushups": { "target": 31, "completed": 0, "type": "monthly" },
+      "reading": { "target": 31, "completed": 0, "type": "monthly" },
+      "drink": { "target": 20, "completed": 0, "type": "monthly" },
+      "movement": { "target": 20, "completed": 0, "type": "monthly" }
+    }
+  },
+  "userDailyData": {
+    "casey": {},
+    "kyle": {},
+    "jillian": {}
+  },
+  "currentUser": "casey",
+  "lastUpdated": "2025-01-27T00:00:00.000Z"
+}
