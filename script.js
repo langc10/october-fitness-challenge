@@ -86,33 +86,28 @@ function switchUser(user) {
     updateStats();
 }
 
-// Shared storage using JSONBin.io (free service)
-const JSONBIN_BIN_ID = '65f8a1231f5677401f3b4f7e';
-const JSONBIN_API_KEY = '$2a$10$V8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8';
+// Simple shared storage using a free JSON hosting service
+const SHARED_DATA_URL = 'https://jsonblob.com/api/jsonBlob/1148427339089379328';
 
 // Load data from shared storage
 async function loadData() {
     try {
         console.log('Loading data from shared storage...');
         
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-            headers: {
-                'X-Master-Key': JSONBIN_API_KEY
-            }
-        });
+        const response = await fetch(SHARED_DATA_URL);
         
         if (response.ok) {
-            const result = await response.json();
-            const data = result.record;
+            const data = await response.json();
             
             if (data && data.userChallenges) {
                 Object.assign(userChallenges, data.userChallenges);
+                console.log('Loaded user challenges:', data.userChallenges);
             }
             if (data && data.userDailyData) {
                 Object.assign(userDailyData, data.userDailyData);
             }
             
-            console.log('Data loaded from shared storage:', data);
+            console.log('Data loaded from shared storage successfully');
         } else {
             console.log('No shared data found, using localStorage');
             loadFromLocalStorage();
@@ -155,11 +150,10 @@ async function saveData() {
         
         console.log('Saving data to shared storage:', dataToSave);
         
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+        const response = await fetch(SHARED_DATA_URL, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': JSONBIN_API_KEY
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(dataToSave)
         });
