@@ -86,18 +86,18 @@ function switchUser(user) {
     updateStats();
 }
 
-// Cloud storage configuration
-const CLOUD_STORAGE_URL = 'https://api.jsonbin.io/v3/b/65f8a1231f5677401f3b4f7e';
-const CLOUD_API_KEY = '$2a$10$V8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8';
+// Shared storage using JSONBin.io (free service)
+const JSONBIN_BIN_ID = '65f8a1231f5677401f3b4f7e';
+const JSONBIN_API_KEY = '$2a$10$V8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8';
 
-// Load data from cloud storage
+// Load data from shared storage
 async function loadData() {
     try {
-        console.log('Loading data from cloud storage...');
-        const response = await fetch(CLOUD_STORAGE_URL, {
-            method: 'GET',
+        console.log('Loading data from shared storage...');
+        
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
             headers: {
-                'X-Master-Key': CLOUD_API_KEY
+                'X-Master-Key': JSONBIN_API_KEY
             }
         });
         
@@ -111,37 +111,39 @@ async function loadData() {
             if (data && data.userDailyData) {
                 Object.assign(userDailyData, data.userDailyData);
             }
-            if (data && data.currentUser) {
-                currentUser = data.currentUser;
-            }
             
-            console.log('Data loaded from cloud:', data);
+            console.log('Data loaded from shared storage:', data);
         } else {
-            console.log('No cloud data found, using defaults');
+            console.log('No shared data found, using localStorage');
+            loadFromLocalStorage();
         }
     } catch (error) {
-        console.log('Error loading from cloud, using defaults:', error);
-        // Fallback to localStorage
-        const savedUserChallenges = localStorage.getItem('octoberChallenge2025MultiUser');
-        const savedUserDailyData = localStorage.getItem('octoberDailyData2025MultiUser');
-        const savedCurrentUser = localStorage.getItem('octoberCurrentUser2025');
-        
-        if (savedUserChallenges) {
-            const parsed = JSON.parse(savedUserChallenges);
-            Object.assign(userChallenges, parsed);
-        }
-        
-        if (savedUserDailyData) {
-            userDailyData = JSON.parse(savedUserDailyData);
-        }
-        
-        if (savedCurrentUser) {
-            currentUser = savedCurrentUser;
-        }
+        console.log('Error loading from shared storage, using localStorage:', error);
+        loadFromLocalStorage();
     }
 }
 
-// Save data to cloud storage
+// Load from localStorage as fallback
+function loadFromLocalStorage() {
+    const savedUserChallenges = localStorage.getItem('octoberChallenge2025MultiUser');
+    const savedUserDailyData = localStorage.getItem('octoberDailyData2025MultiUser');
+    const savedCurrentUser = localStorage.getItem('octoberCurrentUser2025');
+    
+    if (savedUserChallenges) {
+        const parsed = JSON.parse(savedUserChallenges);
+        Object.assign(userChallenges, parsed);
+    }
+    
+    if (savedUserDailyData) {
+        userDailyData = JSON.parse(savedUserDailyData);
+    }
+    
+    if (savedCurrentUser) {
+        currentUser = savedCurrentUser;
+    }
+}
+
+// Save data to shared storage
 async function saveData() {
     try {
         const dataToSave = {
@@ -151,33 +153,34 @@ async function saveData() {
             lastUpdated: new Date().toISOString()
         };
         
-        console.log('Saving data to cloud:', dataToSave);
+        console.log('Saving data to shared storage:', dataToSave);
         
-        const response = await fetch(CLOUD_STORAGE_URL, {
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Master-Key': CLOUD_API_KEY
+                'X-Master-Key': JSONBIN_API_KEY
             },
             body: JSON.stringify(dataToSave)
         });
         
         if (response.ok) {
-            console.log('Data saved to cloud successfully');
+            console.log('Data saved to shared storage successfully');
         } else {
-            console.log('Error saving to cloud:', response.status);
-            // Fallback to localStorage
-            localStorage.setItem('octoberChallenge2025MultiUser', JSON.stringify(userChallenges));
-            localStorage.setItem('octoberDailyData2025MultiUser', JSON.stringify(userDailyData));
-            localStorage.setItem('octoberCurrentUser2025', currentUser);
+            console.log('Error saving to shared storage:', response.status);
+            saveToLocalStorage();
         }
     } catch (error) {
-        console.log('Error saving to cloud, using localStorage:', error);
-        // Fallback to localStorage
-        localStorage.setItem('octoberChallenge2025MultiUser', JSON.stringify(userChallenges));
-        localStorage.setItem('octoberDailyData2025MultiUser', JSON.stringify(userDailyData));
-        localStorage.setItem('octoberCurrentUser2025', currentUser);
+        console.log('Error saving to shared storage:', error);
+        saveToLocalStorage();
     }
+}
+
+// Fallback save to localStorage
+function saveToLocalStorage() {
+    localStorage.setItem('octoberChallenge2025MultiUser', JSON.stringify(userChallenges));
+    localStorage.setItem('octoberDailyData2025MultiUser', JSON.stringify(userDailyData));
+    localStorage.setItem('octoberCurrentUser2025', currentUser);
 }
 
 // Get date string in YYYY-MM-DD format
